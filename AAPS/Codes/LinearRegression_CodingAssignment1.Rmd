@@ -1,0 +1,260 @@
+---
+title: "Linear Regression Coding Assignment-1"
+editor_options:
+  chunk_output_type: console
+output: html_notebook
+---
+
+```{r}
+# Load essential libraries
+library(ggplot2)
+library(dplyr)
+library(HSAUR)
+library(ggcorrplot)
+```
+
+```{r}
+# Load the heptathlon dataset
+data(heptathlon)
+str(heptathlon)
+```
+
+
+```{r}
+# Set ggplot theme for plotting
+My_Theme = theme(axis.text.x = element_text(size = 9),
+   axis.text.y = element_text(size = 9),
+   axis.title.x = element_text(size = 11),
+   axis.title.y = element_text(size = 11),
+   plot.title = element_text(size = 12, hjust = 0.5, face = "bold"))
+```
+
+```{r}
+# Introduce a new column called sprint highlighting slow and fast sprinters using the 25th percentile of run times in 200m and 800m
+heptathlon = heptathlon %>% mutate(sprint = ifelse(run200m <= quantile(heptathlon$run200m, 0.25) & run800m <= quantile(heptathlon$run800m, 0.25),'fast', 'slow'))
+```
+
+```{r}
+# Change sprint column to factor type
+heptathlon['sprint'] = as.factor(heptathlon$sprint)
+str(heptathlon)
+```
+
+```{r}
+# How many levels does the categorical variable *sprint* have? What is the reference level? 
+contrasts(heptathlon$sprint)
+```
+
+```{r}
+# Create lists of categorical and continuous columns
+categorical_cols = c('sprint')
+continuous_cols = setdiff(colnames(heptathlon), categorical_cols)
+```
+
+```{r}
+# Fit a linear model for approximating *score* as a function of *sprint*. Print the model's summary. How accurate is the model? How do the slow athletes' scores compare to the fast ones?
+model1 = lm(data = heptathlon, score ~ sprint)
+summary(model1)
+```
+
+```{r}
+# Fit a linear model for approximating *score* as a function of *shot* and *sprint*. Print the model's summary and answer the following questions:
+
+# 1. Did the addition of the new predictor *shot* improve the model accuracy? 
+# 2. *True/false* (explain in one line): the model suggests that there is a possible linear relationship between an athlete's score and sprintslow.
+# 3. For a 1 metre increase in shot put throw and with the same sprint performance, we can say with 95% confidence that the athlete's score will increase/decrease by an amount in the interval [?, ?].
+model2 = lm(data = heptathlon, score ~ shot + sprint)
+summary(model2)
+```
+
+```{r}
+#FOR MODEL 2
+# Observed values (y)
+y = heptathlon$score
+
+# Predicted values (y_hat)
+y_hat = predict(model2)
+
+# Calculate RSS
+rss = sum((y - y_hat)^2)
+
+# Calculate TSS
+tss = sum((y - mean(y))^2)
+
+# Calculate R^2
+r_squared = 1 - (rss / tss)
+
+# Print R^2
+r_squared
+```
+
+
+```{r}
+#  Using the model built above, extract the slope and intercept for estimating the *score* of *slow* and *fast* athletes. 
+intercept_slow = coef(model1)[1] + coef(model1)[2]
+slope_slow = coef(model2)['shot'] + coef(model2)['sprintslow']
+intercept_fast = coef(model1)[1]
+slope_fast = coef(model2)['shot']
+```
+
+```{r}
+# Fit a linear model for approximating *score* as a function of *shot*, *sprint*, and *javelin*. Print the model's summary.
+model3 = lm(data = heptathlon, score ~ shot + sprint + javelin)
+summary(model3)
+# 1. Did the addition of the new predictor *javelin* improve the model accuracy?
+# 2. *True/false* (explain in one line): the model suggests that there is a possible linear relationship between an athlete's score and javelin performance.
+# 3. For a 1 metre increase in shot put throw and with the same javelin and sprint performance, we can say with 95% confidence that the athlete's score will increase/decrease by an amount in the interval[?,?]
+?
+```
+
+```{r}
+#FOR MODEL 3
+# Observed values (y)
+y = heptathlon$score
+print(y)
+
+# Predicted values (y_hat)
+y_hat = predict(model3)
+print(y_hat)
+
+# Calculate RSS
+rss = sum((y - y_hat)^2)
+
+# Calculate TSS
+tss = sum((y - mean(y))^2)
+
+# Calculate R^2
+r_squared = 1 - (rss / tss)
+
+# Print R^2
+r_squared
+```
+
+
+```{r}
+# Fit a linear model for approximating score as a function of highjump, and sprint. Print the model's summary and answer the following questions:
+model4 = lm(data = heptathlon, score ~ highjump + sprint)
+summary(model4)
+# 1. How accurate is this model?
+# 2. Considering a p-value of 10% as cutoff, are there any insignificant features?
+# 3. extract the slope and intercept for estimating the *score* of *slow* and *fast* athletes.
+intercept_slow_2 = coef(model4)[1] + coef(model4)['sprintslow']
+slope_slow_2 = coef(model4)['highjump']
+intercept_fast_2 = coef(model4)[1]
+slope_fast_2 = coef(model4)['highjump']
+```
+
+```{r}
+#FOR MODEL 4
+# Observed values (y)
+y = heptathlon$score
+
+# Predicted values (y_hat)
+y_hat = predict(model4)
+
+# Calculate RSS
+rss = sum((y - y_hat)^2)
+
+# Calculate TSS
+tss = sum((y - mean(y))^2)
+
+# Calculate R^2
+r_squared = 1 - (rss / tss)
+
+# Print R^2
+r_squared
+```
+
+
+```{r}
+# Fit a linear model for approximating *score* as a function of *shot*, *highjump*, and *sprint*. Print the model's summary and answer the following questions:
+model5 = lm(data = heptathlon, score ~ shot + highjump + sprint)
+summary(model5)
+# 1. How accurate is this model?
+# 2. Considering a p-value of 10% as cutoff, are there any insignificant features?
+?
+```
+
+```{r}
+#FOR MODEL 5
+# Observed values (y)
+y = heptathlon$score
+
+# Predicted values (y_hat)
+y_hat = predict(model5)
+
+# Calculate RSS
+rss = sum((y - y_hat)^2)
+
+# Calculate TSS
+tss = sum((y - mean(y))^2)
+
+# Calculate R^2
+r_squared = 1 - (rss / tss)
+
+# Print R^2
+r_squared
+```
+
+
+```{r}
+# Predict the model out-of-sample performance by applying it to the test data.
+# Split the data into 80% train and 20% test parts
+set.seed(0)
+train_ind = sample(seq_len(nrow(heptathlon)), size = floor(0.8 * nrow(heptathlon)))
+
+hDataTrain = heptathlon[train_ind, ]
+hDataTest = heptathlon[-train_ind, ]
+
+# Build linear regression model
+model6 = lm(data = heptathlon, score ~ shot + highjump + sprint)
+
+# Predict on the test data
+predictions = predict(model6, newdata = hDataTest)
+
+# Print the true scores for the test data
+true_scores = hDataTest$score
+print(data.frame(True_Score = true_scores, Predicted_Score = predictions))
+```
+
+```{r}
+# Extract Residual Standard Error (RSE) from the model summary
+rse <- summary(model1)$sigma
+
+# Number of samples (n) and predictors (k)
+n <- nrow(heptathlon)
+k <- length(model1$coefficients) - 1  # Exclude intercept from predictors count
+
+# Degrees of freedom for residuals
+df_residual <- n - (k + 1)
+
+# Calculate RSS
+rss <- rse^2 * df_residual
+rss
+
+```
+
+```{r}
+#FOR MODEL 1
+# Observed values (y)
+y = heptathlon$score
+print(y)
+
+# Predicted values (y_hat)
+y_hat = predict(model1)
+print(y_hat)
+
+# Calculate RSS
+rss = sum((y - y_hat)^2)
+
+# Calculate TSS
+tss = sum((y - mean(y))^2)
+
+# Calculate R^2
+r_squared = 1 - (rss / tss)
+
+# Print R^2
+r_squared
+
+```
+
