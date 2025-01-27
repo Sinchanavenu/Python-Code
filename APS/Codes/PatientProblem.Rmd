@@ -1,0 +1,59 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+plot(cars)
+```
+
+```{r}
+file = 'Data/emergency.csv'
+dfPatient = read.csv(file, header = TRUE)
+head(dfPatient, 5)
+```
+
+####Next patient is in a good condition
+```{r}
+probabilityGood = mean(dfPatient$Condition == "good")
+print(probabilityGood)
+```
+####Next incoming patient is in a fair condition
+```{r}
+probabilityFair = mean(dfPatient$Condition == "fair")
+print(probabilityFair)
+```
+### Next incoming patient is in a serious condition
+```{r}
+probabilitySerious = mean(dfPatient$Condition == "serious")
+print(probabilitySerious)
+```
+###Next Incoming patient is insured
+```{r}
+probabilityInsured = mean(dfPatient$Insurance == "insured")
+print(probabilityInsured)
+```
+###Next incoming patient is not insured
+```{r}
+probabilityNotInsured = mean(dfPatient$Insurance == "not insured")
+print(probabilityNotInsured)
+```
+###Given that patient is insured, the p that the patient's condition is serious
+```{r}
+probabilityInsured = dfPatient[dfPatient$Insurance == "insured", ]
+
+probabilitySeriousGivenInsured = mean(probabilityInsured$Condition == "serious")
+
+print(probabilitySeriousGivenInsured)
+```
+###Given that the patient is in a serious condition, the p that the patient is insured
+```{r}
+probabilitySerious = dfPatient[dfPatient$Condition == "serious", ]
+
+probabilityInsuredGivenSerious = mean(probabilitySerious$Insurance == "insured")
+
+print(probabilityInsuredGivenSerious)
+```
+

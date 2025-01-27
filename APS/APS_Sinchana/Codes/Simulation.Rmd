@@ -1,0 +1,124 @@
+---
+title: "Quantifying uncertainty using simulation"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+editor_options:
+  chunk_output_type: console
+---
+
+#### Execute the following cells to load the libraries
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+
+#### Sampling space and likelihood vector
+```{r}
+s = c('H', 'T')
+p = c(0.5, 0.5)
+```
+
+
+#### Function to simulate one trial of the random experiment which in this case is tossing 10 fair coins at a time
+```{r}
+simTrial = function(){
+  return(sample(s, 10, replace = TRUE, prob = p))
+}
+```
+
+#### Replicate the trials of the random experiment a large number of times
+```{r}
+nsimulations = 10000
+simulatedData = replicate(nsimulations, simTrial())
+```
+
+#### Function to check if event of interest has occured which in this case is getting exactly 3 heads
+```{r}
+checkEvent = function(data){
+  return(sum(data == 'H') == 3)
+}
+```
+
+#### Calculate the fraction of times the event of interest occured which is what we define as the approximate probability of the event E happening in the next trial of the random experiment
+```{r}
+#simulatedData
+mean(apply(simulatedData, 2, checkEvent))
+```
+
+```{r}
+courtData= read.csv('Data/court.csv')
+head(courtData,5)
+```
+
+```{r}
+simtrialJudge = function(n){
+  jcp= apply(courtData,2,mean)
+  jcip=1-jcp
+  s=c(1,0)
+  court_decision= vector('integer',n)
+  for(j in 1:n){
+    court_decision[j]=sample(s,1,p=c(jcp[j],jcip[j]))
+  }
+  return(court_decision)
+}
+```
+
+```{r}
+checkEventJudge = function(data){
+  if(sum(data)<=2){
+    return (1)
+  }
+  else{
+    return (0)
+  }
+}
+```
+
+```{r}
+simulateData= replicate(10000, simtrialJudge(5))
+print(simulateData)
+apply(simulateData,2, checkEventJudge)
+mean(apply(simulateData,2, checkEventJudge))
+```
+
+###Birthday problem
+
+```{r}
+simtrialBirthday = function(n){
+  return(sample(1:365, 60, replace=TRUE, prob=replicate(365,1/365)))
+}
+simtrialBirthday(60)
+```
+
+```{r}
+#checkEventBirthday = function(data){
+ # if(sum(data)>= 2){
+  #  return (1)
+  #}
+  #else{
+  #  return (0)
+  #}
+#}
+checkEventBirthday = function(data) {
+  num_students = length(data)
+  for (i in 1:(num_students - 1)) {
+    for (j in (i + 1):num_students) {
+      if (data[i] == data[j]) {
+        return (1)
+      }
+    }
+  }
+  return (0)  
+}
+
+```
+
+```{r}
+simulateBirthday= replicate(10000, simtrialBirthday(60))
+apply(simulateBirthday,2, checkEventBirthday)
+probability=mean(apply(simulateBirthday,2, checkEventBirthday))
+print(probability)
+```
+

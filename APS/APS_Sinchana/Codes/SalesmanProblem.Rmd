@@ -1,0 +1,78 @@
+---
+title: "Untitled"
+output:
+  word_document: default
+  pdf_document: default
+date: "2024-09-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+```{r}
+# 1. Sampling space for appointment success (0 corresponds to no sale, 1 corresponds to a sale)
+s_appointment = c(0, 1)
+
+# 2. Appointment success and failure probabilities
+p_morning = 0.3  # Success probability of sale in the morning
+p_afternoon = 0.6  # Success probability of sale in the afternoon
+
+p_appointment = matrix(c(1-p_morning, p_morning, 1-p_afternoon, p_afternoon), nrow = 2, byrow = TRUE)
+
+# 3. Sampling space for software type (5000 for base, 10000 for premium)
+s_software = c(5000, 10000)
+
+# 4. Software type probabilities
+# For morning: 70% chance for premium, 30% for base
+# For afternoon: 50% chance for premium, 50% for base
+p_software = matrix(c(0.3, 0.7, 0.5, 0.5), nrow = 2, byrow = TRUE)
+
+
+```
+
+```{r}
+# 5. Function that simulates one trial of the random experiment
+# This function returns what the salesman earns on a random day
+salesResult = function() {
+  result =  numeric(2)  # Initialize for storing results of morning and afternoon
+  for (j in 1:2) {
+    result[j] = sample(s_appointment, size = 1, replace = TRUE, prob = p_appointment[j,])
+  }
+  # Determine earnings based on appointment success and type of software sold
+  earnings = ifelse(result[1] == 1, sample(s_software, size = 1, replace = TRUE, prob = p_software[1,]), 0) + 
+              ifelse(result[2] == 1, sample(s_software, size = 1, replace = TRUE, prob = p_software[2,]), 0)
+  return(earnings)
+}
+
+```
+
+```{r}
+# 6. Number of simulations
+nsimulations = 1e5
+
+# 7. Simulate for multiple trials
+simulatedData = replicate(nsimulations, salesResult())
+
+# 8. Probability calculations
+# Probability that the salesman earns Rs 5000
+prob_5000 = mean(simulatedData == 5000)
+# Probability that the salesman earns Rs 10000
+prob_10000 = mean(simulatedData == 10000)
+# Probability that the salesman earns Rs 15000
+prob_15000 = mean(simulatedData == 15000)
+# Probability of no sale (Rs 0)
+prob_0 = mean(simulatedData == 0)
+
+
+cat("Probability of earning Rs 0:", prob_0, "\n")
+cat("Probability of earning Rs 5000:", prob_5000, "\n")
+cat("Probability of earning Rs 10000:", prob_10000, "\n")
+cat("Probability of earning Rs 15000:", prob_15000, "\n")
+```
+
+
